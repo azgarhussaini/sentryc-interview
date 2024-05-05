@@ -166,6 +166,12 @@ dependencies {
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:testcontainers"
     // jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
+
+
+    // https://mvnrepository.com/artifact/com.graphql-java-kickstart/graphql-spring-boot-starter
+    implementation 'com.graphql-java:graphql-java:22.0-rc1'
+    implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:15.1.0'
+    implementation 'com.graphql-java-kickstart:graphql-java-tools:13.1.1'
 }
 
 task cleanResources(type: Delete) {

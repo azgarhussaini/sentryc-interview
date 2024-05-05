@@ -33,12 +33,12 @@ public class Seller implements Serializable {
     private SellerState state;
 
     @JsonIgnoreProperties(value = { "seller" }, allowSetters = true)
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.EAGER)
     @NotNull
     @JoinColumn(unique = true)
     private Producer producerId;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @NotNull
     @JsonIgnoreProperties(value = { "marketplaceId" }, allowSetters = true)
     private SellerInfo sellerInfoId;
