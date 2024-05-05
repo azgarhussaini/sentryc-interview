@@ -1,0 +1,9 @@
+export enum SellerState {
+  REGULAR = 'REGULAR',
+
+  WHITELISTED = 'WHITELISTED',
+
+  GREYLISTED = 'GREYLISTED',
+
+  BLACKLISTED = 'BLACKLISTED',
+}

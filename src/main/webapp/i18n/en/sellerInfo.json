@@ -1,0 +1,28 @@
+{
+  "sentryInterviewApp": {
+    "sellerInfo": {
+      "home": {
+        "title": "Seller Infos",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Seller Info",
+        "createOrEditLabel": "Create or edit a Seller Info",
+        "notFound": "No Seller Infos found"
+      },
+      "created": "A new Seller Info is created with identifier {{ param }}",
+      "updated": "A Seller Info is updated with identifier {{ param }}",
+      "deleted": "A Seller Info is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Seller Info {{ id }}?"
+      },
+      "detail": {
+        "title": "Seller Info"
+      },
+      "id": "Id",
+      "marketplaceName": "Marketplace Name",
+      "url": "Url",
+      "country": "Country",
+      "externalId": "External Id",
+      "marketplaceId": "Marketplace Id"
+    }
+  }
+}

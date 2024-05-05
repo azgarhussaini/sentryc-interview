@@ -1,0 +1,11 @@
+{
+  "sentryInterviewApp": {
+    "SellerState": {
+      "null": "",
+      "REGULAR": "REGULAR",
+      "WHITELISTED": "WHITELISTED",
+      "GREYLISTED": "GREYLISTED",
+      "BLACKLISTED": "BLACKLISTED"
+    }
+  }
+}

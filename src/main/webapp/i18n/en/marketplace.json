@@ -1,0 +1,26 @@
+{
+  "sentryInterviewApp": {
+    "marketplace": {
+      "home": {
+        "title": "Marketplaces",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Marketplace",
+        "createOrEditLabel": "Create or edit a Marketplace",
+        "notFound": "No Marketplaces found"
+      },
+      "created": "A new Marketplace is created with identifier {{ param }}",
+      "updated": "A Marketplace is updated with identifier {{ param }}",
+      "deleted": "A Marketplace is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Marketplace {{ id }}?"
+      },
+      "detail": {
+        "title": "Marketplace"
+      },
+      "id": "Id",
+      "description": "Description",
+      "marketplaceLogo": "Marketplace Logo",
+      "sellerInfo": "Seller Info"
+    }
+  }
+}

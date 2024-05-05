@@ -1,0 +1,57 @@
+
+URL_MAX_LENGTH = 2048
+
+entity Marketplace {
+    id String required
+    description String required
+    marketplaceLogo ImageBlob
+}
+
+entity SellerInfo {
+    id UUID unique required
+    marketplaceName String required maxlength(URL_MAX_LENGTH)
+    url String  maxlength(URL_MAX_LENGTH)
+    country String required
+    externalId String required
+}
+relationship OneToOne {
+    SellerInfo{marketplaceId(id) required } to Marketplace
+}
+entity Seller {
+    id UUID required
+    sellerName String required
+    state SellerState required
+}
+enum SellerSortBy {
+    SELLER_INFO_EXTERNAL_ID_ASC
+    SELLER_INFO_EXTERNAL_ID_DESC
+    NAME_ASC
+    NAME_DESC
+    MARKETPLACE_ID_ASC
+    MARKETPLACE_ID_DESC
+}
+enum SellerState {
+    REGULAR
+    WHITELISTED
+    GREYLISTED
+    BLACKLISTED
+}
+relationship ManyToOne {
+    Seller{sellerInfoId(id) required} to SellerInfo
+}
+relationship OneToOne {
+    Seller{producerId(id) required} to Producer
+}
+
+entity Producer {
+    id UUID unique required
+    producerName String required
+    createdAt Instant required
+    producerLogo ImageBlob
+}
+
+
+
+filter all
+service all with  serviceImpl
+paginate all with pagination

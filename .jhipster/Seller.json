@@ -1,0 +1,47 @@
+{
+  "annotations": {
+    "changelogDate": "20240505210110"
+  },
+  "applications": "*",
+  "fields": [
+    {
+      "fieldName": "id",
+      "fieldType": "UUID",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "sellerName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "state",
+      "fieldType": "SellerState",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "REGULAR,WHITELISTED,GREYLISTED,BLACKLISTED"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Seller",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "producer",
+      "relationshipName": "producerId",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "otherEntityField": "id",
+      "otherEntityName": "sellerInfo",
+      "relationshipName": "sellerInfoId",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}
