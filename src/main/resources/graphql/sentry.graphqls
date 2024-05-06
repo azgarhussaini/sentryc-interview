@@ -8,7 +8,7 @@ type Query {
     sellerInfos: [SellerInfo!]!
     sellers: [Seller!]!
 
-    sellersGraphQl(filter: SellerFilter, page: PageInput!, sortBy: SellerSortBy): SellerPageableResponse!
+    sellersGraphQl(filter: SellerFilter, page: PageInput!): SellerPageableResponse!
 
 }
 
@@ -29,8 +29,8 @@ type Seller {
     id: ID!
     sellerName: String!
     state: SellerState!
-    sellerInfo: SellerInfo!
-    producer: [Producer!]!
+    sellerInfoId: SellerInfo!
+    producerId: [Producer!]!
 }
 
 type SellerInfo {
