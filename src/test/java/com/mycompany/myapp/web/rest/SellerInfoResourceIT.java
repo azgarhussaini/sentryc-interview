@@ -12,6 +12,8 @@ import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Marketplace;
 import com.mycompany.myapp.domain.SellerInfo;
 import com.mycompany.myapp.repository.SellerInfoRepository;
+import com.mycompany.myapp.service.dto.SellerInfoDTO;
+import com.mycompany.myapp.service.mapper.SellerInfoMapper;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +53,9 @@ class SellerInfoResourceIT {
 
     @Autowired
     private SellerInfoRepository sellerInfoRepository;
+
+    @Autowired
+    private SellerInfoMapper sellerInfoMapper;
 
     @Autowired
     private EntityManager em;
@@ -120,18 +125,20 @@ class SellerInfoResourceIT {
     void createSellerInfo() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the SellerInfo
-        var returnedSellerInfo = om.readValue(
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+        var returnedSellerInfoDTO = om.readValue(
             restSellerInfoMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfoDTO)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            SellerInfo.class
+            SellerInfoDTO.class
         );
 
         // Validate the SellerInfo in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
+        var returnedSellerInfo = sellerInfoMapper.toEntity(returnedSellerInfoDTO);
         assertSellerInfoUpdatableFieldsEquals(returnedSellerInfo, getPersistedSellerInfo(returnedSellerInfo));
     }
 
@@ -140,12 +147,13 @@ class SellerInfoResourceIT {
     void createSellerInfoWithExistingId() throws Exception {
         // Create the SellerInfo with an existing ID
         sellerInfoRepository.saveAndFlush(sellerInfo);
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restSellerInfoMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfoDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the SellerInfo in the database
@@ -160,9 +168,10 @@ class SellerInfoResourceIT {
         sellerInfo.setMarketplaceName(null);
 
         // Create the SellerInfo, which fails.
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
 
         restSellerInfoMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfoDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -176,9 +185,10 @@ class SellerInfoResourceIT {
         sellerInfo.setCountry(null);
 
         // Create the SellerInfo, which fails.
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
 
         restSellerInfoMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfoDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -192,9 +202,10 @@ class SellerInfoResourceIT {
         sellerInfo.setExternalId(null);
 
         // Create the SellerInfo, which fails.
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
 
         restSellerInfoMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfoDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -546,12 +557,13 @@ class SellerInfoResourceIT {
             .url(UPDATED_URL)
             .country(UPDATED_COUNTRY)
             .externalId(UPDATED_EXTERNAL_ID);
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(updatedSellerInfo);
 
         restSellerInfoMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedSellerInfo.getId())
+                put(ENTITY_API_URL_ID, sellerInfoDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(updatedSellerInfo))
+                    .content(om.writeValueAsBytes(sellerInfoDTO))
             )
             .andExpect(status().isOk());
 
@@ -566,10 +578,15 @@ class SellerInfoResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         sellerInfo.setId(UUID.randomUUID());
 
+        // Create the SellerInfo
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSellerInfoMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, sellerInfo.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo))
+                put(ENTITY_API_URL_ID, sellerInfoDTO.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(sellerInfoDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -583,10 +600,15 @@ class SellerInfoResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         sellerInfo.setId(UUID.randomUUID());
 
+        // Create the SellerInfo
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerInfoMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo))
+                put(ENTITY_API_URL_ID, UUID.randomUUID())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(sellerInfoDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -600,9 +622,12 @@ class SellerInfoResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         sellerInfo.setId(UUID.randomUUID());
 
+        // Create the SellerInfo
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerInfoMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfo)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerInfoDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the SellerInfo in the database
@@ -678,12 +703,15 @@ class SellerInfoResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         sellerInfo.setId(UUID.randomUUID());
 
+        // Create the SellerInfo
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSellerInfoMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, sellerInfo.getId())
+                patch(ENTITY_API_URL_ID, sellerInfoDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(sellerInfo))
+                    .content(om.writeValueAsBytes(sellerInfoDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -697,12 +725,15 @@ class SellerInfoResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         sellerInfo.setId(UUID.randomUUID());
 
+        // Create the SellerInfo
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerInfoMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, UUID.randomUUID())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(sellerInfo))
+                    .content(om.writeValueAsBytes(sellerInfoDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -716,9 +747,12 @@ class SellerInfoResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         sellerInfo.setId(UUID.randomUUID());
 
+        // Create the SellerInfo
+        SellerInfoDTO sellerInfoDTO = sellerInfoMapper.toDto(sellerInfo);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerInfoMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(sellerInfo)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(sellerInfoDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the SellerInfo in the database

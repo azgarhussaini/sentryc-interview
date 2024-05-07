@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Marketplace;
 import com.mycompany.myapp.repository.MarketplaceRepository;
+import com.mycompany.myapp.service.dto.MarketplaceDTO;
+import com.mycompany.myapp.service.mapper.MarketplaceMapper;
 import jakarta.persistence.EntityManager;
 import java.util.Base64;
 import java.util.UUID;
@@ -47,6 +49,9 @@ class MarketplaceResourceIT {
 
     @Autowired
     private MarketplaceRepository marketplaceRepository;
+
+    @Autowired
+    private MarketplaceMapper marketplaceMapper;
 
     @Autowired
     private EntityManager em;
@@ -94,18 +99,20 @@ class MarketplaceResourceIT {
     void createMarketplace() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the Marketplace
-        var returnedMarketplace = om.readValue(
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+        var returnedMarketplaceDTO = om.readValue(
             restMarketplaceMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplace)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplaceDTO)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            Marketplace.class
+            MarketplaceDTO.class
         );
 
         // Validate the Marketplace in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
+        var returnedMarketplace = marketplaceMapper.toEntity(returnedMarketplaceDTO);
         assertMarketplaceUpdatableFieldsEquals(returnedMarketplace, getPersistedMarketplace(returnedMarketplace));
     }
 
@@ -114,12 +121,13 @@ class MarketplaceResourceIT {
     void createMarketplaceWithExistingId() throws Exception {
         // Create the Marketplace with an existing ID
         marketplace.setId("existing_id");
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restMarketplaceMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplace)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplaceDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Marketplace in the database
@@ -134,9 +142,10 @@ class MarketplaceResourceIT {
         marketplace.setDescription(null);
 
         // Create the Marketplace, which fails.
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
 
         restMarketplaceMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplace)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplaceDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -311,12 +320,13 @@ class MarketplaceResourceIT {
             .description(UPDATED_DESCRIPTION)
             .marketplaceLogo(UPDATED_MARKETPLACE_LOGO)
             .marketplaceLogoContentType(UPDATED_MARKETPLACE_LOGO_CONTENT_TYPE);
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(updatedMarketplace);
 
         restMarketplaceMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedMarketplace.getId())
+                put(ENTITY_API_URL_ID, marketplaceDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(updatedMarketplace))
+                    .content(om.writeValueAsBytes(marketplaceDTO))
             )
             .andExpect(status().isOk());
 
@@ -331,12 +341,15 @@ class MarketplaceResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         marketplace.setId(UUID.randomUUID().toString());
 
+        // Create the Marketplace
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restMarketplaceMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, marketplace.getId())
+                put(ENTITY_API_URL_ID, marketplaceDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(marketplace))
+                    .content(om.writeValueAsBytes(marketplaceDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -350,12 +363,15 @@ class MarketplaceResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         marketplace.setId(UUID.randomUUID().toString());
 
+        // Create the Marketplace
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restMarketplaceMockMvc
             .perform(
                 put(ENTITY_API_URL_ID, UUID.randomUUID().toString())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(marketplace))
+                    .content(om.writeValueAsBytes(marketplaceDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -369,9 +385,12 @@ class MarketplaceResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         marketplace.setId(UUID.randomUUID().toString());
 
+        // Create the Marketplace
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restMarketplaceMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplace)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(marketplaceDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Marketplace in the database
@@ -444,12 +463,15 @@ class MarketplaceResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         marketplace.setId(UUID.randomUUID().toString());
 
+        // Create the Marketplace
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restMarketplaceMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, marketplace.getId())
+                patch(ENTITY_API_URL_ID, marketplaceDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(marketplace))
+                    .content(om.writeValueAsBytes(marketplaceDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -463,12 +485,15 @@ class MarketplaceResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         marketplace.setId(UUID.randomUUID().toString());
 
+        // Create the Marketplace
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restMarketplaceMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, UUID.randomUUID().toString())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(marketplace))
+                    .content(om.writeValueAsBytes(marketplaceDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -482,9 +507,12 @@ class MarketplaceResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         marketplace.setId(UUID.randomUUID().toString());
 
+        // Create the Marketplace
+        MarketplaceDTO marketplaceDTO = marketplaceMapper.toDto(marketplace);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restMarketplaceMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(marketplace)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(marketplaceDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Marketplace in the database

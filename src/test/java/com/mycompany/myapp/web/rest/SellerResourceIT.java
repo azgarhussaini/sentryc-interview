@@ -14,6 +14,8 @@ import com.mycompany.myapp.domain.Seller;
 import com.mycompany.myapp.domain.SellerInfo;
 import com.mycompany.myapp.domain.enumeration.SellerState;
 import com.mycompany.myapp.repository.SellerRepository;
+import com.mycompany.myapp.service.dto.SellerDTO;
+import com.mycompany.myapp.service.mapper.SellerMapper;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +49,9 @@ class SellerResourceIT {
 
     @Autowired
     private SellerRepository sellerRepository;
+
+    @Autowired
+    private SellerMapper sellerMapper;
 
     @Autowired
     private EntityManager em;
@@ -128,18 +133,20 @@ class SellerResourceIT {
     void createSeller() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the Seller
-        var returnedSeller = om.readValue(
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+        var returnedSellerDTO = om.readValue(
             restSellerMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            Seller.class
+            SellerDTO.class
         );
 
         // Validate the Seller in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
+        var returnedSeller = sellerMapper.toEntity(returnedSellerDTO);
         assertSellerUpdatableFieldsEquals(returnedSeller, getPersistedSeller(returnedSeller));
     }
 
@@ -148,12 +155,13 @@ class SellerResourceIT {
     void createSellerWithExistingId() throws Exception {
         // Create the Seller with an existing ID
         sellerRepository.saveAndFlush(seller);
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restSellerMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Seller in the database
@@ -168,9 +176,10 @@ class SellerResourceIT {
         seller.setSellerName(null);
 
         // Create the Seller, which fails.
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
 
         restSellerMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -184,9 +193,10 @@ class SellerResourceIT {
         seller.setState(null);
 
         // Create the Seller, which fails.
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
 
         restSellerMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -415,12 +425,11 @@ class SellerResourceIT {
         // Disconnect from session so that the updates on updatedSeller are not directly saved in db
         em.detach(updatedSeller);
         updatedSeller.sellerName(UPDATED_SELLER_NAME).state(UPDATED_STATE);
+        SellerDTO sellerDTO = sellerMapper.toDto(updatedSeller);
 
         restSellerMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedSeller.getId())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(updatedSeller))
+                put(ENTITY_API_URL_ID, sellerDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO))
             )
             .andExpect(status().isOk());
 
@@ -435,9 +444,14 @@ class SellerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         seller.setId(UUID.randomUUID());
 
+        // Create the Seller
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSellerMockMvc
-            .perform(put(ENTITY_API_URL_ID, seller.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller)))
+            .perform(
+                put(ENTITY_API_URL_ID, sellerDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO))
+            )
             .andExpect(status().isBadRequest());
 
         // Validate the Seller in the database
@@ -450,10 +464,13 @@ class SellerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         seller.setId(UUID.randomUUID());
 
+        // Create the Seller
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller))
+                put(ENTITY_API_URL_ID, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -467,9 +484,12 @@ class SellerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         seller.setId(UUID.randomUUID());
 
+        // Create the Seller
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(seller)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(sellerDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Seller in the database
@@ -538,10 +558,15 @@ class SellerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         seller.setId(UUID.randomUUID());
 
+        // Create the Seller
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restSellerMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, seller.getId()).contentType("application/merge-patch+json").content(om.writeValueAsBytes(seller))
+                patch(ENTITY_API_URL_ID, sellerDTO.getId())
+                    .contentType("application/merge-patch+json")
+                    .content(om.writeValueAsBytes(sellerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -555,12 +580,15 @@ class SellerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         seller.setId(UUID.randomUUID());
 
+        // Create the Seller
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, UUID.randomUUID())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(seller))
+                    .content(om.writeValueAsBytes(sellerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -574,9 +602,12 @@ class SellerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         seller.setId(UUID.randomUUID());
 
+        // Create the Seller
+        SellerDTO sellerDTO = sellerMapper.toDto(seller);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restSellerMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(seller)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(sellerDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Seller in the database

@@ -1,10 +1,10 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.Marketplace;
 import com.mycompany.myapp.repository.MarketplaceRepository;
 import com.mycompany.myapp.service.MarketplaceQueryService;
 import com.mycompany.myapp.service.MarketplaceService;
 import com.mycompany.myapp.service.criteria.MarketplaceCriteria;
+import com.mycompany.myapp.service.dto.MarketplaceDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -59,42 +59,42 @@ public class MarketplaceResource {
     /**
      * {@code POST  /marketplaces} : Create a new marketplace.
      *
-     * @param marketplace the marketplace to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new marketplace, or with status {@code 400 (Bad Request)} if the marketplace has already an ID.
+     * @param marketplaceDTO the marketplaceDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new marketplaceDTO, or with status {@code 400 (Bad Request)} if the marketplace has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<Marketplace> createMarketplace(@Valid @RequestBody Marketplace marketplace) throws URISyntaxException {
-        log.debug("REST request to save Marketplace : {}", marketplace);
-        if (marketplace.getId() != null) {
+    public ResponseEntity<MarketplaceDTO> createMarketplace(@Valid @RequestBody MarketplaceDTO marketplaceDTO) throws URISyntaxException {
+        log.debug("REST request to save Marketplace : {}", marketplaceDTO);
+        if (marketplaceDTO.getId() != null) {
             throw new BadRequestAlertException("A new marketplace cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        marketplace = marketplaceService.save(marketplace);
-        return ResponseEntity.created(new URI("/api/marketplaces/" + marketplace.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, marketplace.getId()))
-            .body(marketplace);
+        marketplaceDTO = marketplaceService.save(marketplaceDTO);
+        return ResponseEntity.created(new URI("/api/marketplaces/" + marketplaceDTO.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, marketplaceDTO.getId()))
+            .body(marketplaceDTO);
     }
 
     /**
      * {@code PUT  /marketplaces/:id} : Updates an existing marketplace.
      *
-     * @param id the id of the marketplace to save.
-     * @param marketplace the marketplace to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated marketplace,
-     * or with status {@code 400 (Bad Request)} if the marketplace is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the marketplace couldn't be updated.
+     * @param id the id of the marketplaceDTO to save.
+     * @param marketplaceDTO the marketplaceDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated marketplaceDTO,
+     * or with status {@code 400 (Bad Request)} if the marketplaceDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the marketplaceDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Marketplace> updateMarketplace(
+    public ResponseEntity<MarketplaceDTO> updateMarketplace(
         @PathVariable(value = "id", required = false) final String id,
-        @Valid @RequestBody Marketplace marketplace
+        @Valid @RequestBody MarketplaceDTO marketplaceDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update Marketplace : {}, {}", id, marketplace);
-        if (marketplace.getId() == null) {
+        log.debug("REST request to update Marketplace : {}, {}", id, marketplaceDTO);
+        if (marketplaceDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, marketplace.getId())) {
+        if (!Objects.equals(id, marketplaceDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -102,33 +102,33 @@ public class MarketplaceResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        marketplace = marketplaceService.update(marketplace);
+        marketplaceDTO = marketplaceService.update(marketplaceDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, marketplace.getId()))
-            .body(marketplace);
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, marketplaceDTO.getId()))
+            .body(marketplaceDTO);
     }
 
     /**
      * {@code PATCH  /marketplaces/:id} : Partial updates given fields of an existing marketplace, field will ignore if it is null
      *
-     * @param id the id of the marketplace to save.
-     * @param marketplace the marketplace to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated marketplace,
-     * or with status {@code 400 (Bad Request)} if the marketplace is not valid,
-     * or with status {@code 404 (Not Found)} if the marketplace is not found,
-     * or with status {@code 500 (Internal Server Error)} if the marketplace couldn't be updated.
+     * @param id the id of the marketplaceDTO to save.
+     * @param marketplaceDTO the marketplaceDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated marketplaceDTO,
+     * or with status {@code 400 (Bad Request)} if the marketplaceDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the marketplaceDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the marketplaceDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<Marketplace> partialUpdateMarketplace(
+    public ResponseEntity<MarketplaceDTO> partialUpdateMarketplace(
         @PathVariable(value = "id", required = false) final String id,
-        @NotNull @RequestBody Marketplace marketplace
+        @NotNull @RequestBody MarketplaceDTO marketplaceDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Marketplace partially : {}, {}", id, marketplace);
-        if (marketplace.getId() == null) {
+        log.debug("REST request to partial update Marketplace partially : {}, {}", id, marketplaceDTO);
+        if (marketplaceDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, marketplace.getId())) {
+        if (!Objects.equals(id, marketplaceDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -136,11 +136,11 @@ public class MarketplaceResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<Marketplace> result = marketplaceService.partialUpdate(marketplace);
+        Optional<MarketplaceDTO> result = marketplaceService.partialUpdate(marketplaceDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, marketplace.getId())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, marketplaceDTO.getId())
         );
     }
 
@@ -152,13 +152,13 @@ public class MarketplaceResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of marketplaces in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<Marketplace>> getAllMarketplaces(
+    public ResponseEntity<List<MarketplaceDTO>> getAllMarketplaces(
         MarketplaceCriteria criteria,
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         log.debug("REST request to get Marketplaces by criteria: {}", criteria);
 
-        Page<Marketplace> page = marketplaceQueryService.findByCriteria(criteria, pageable);
+        Page<MarketplaceDTO> page = marketplaceQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -178,20 +178,20 @@ public class MarketplaceResource {
     /**
      * {@code GET  /marketplaces/:id} : get the "id" marketplace.
      *
-     * @param id the id of the marketplace to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the marketplace, or with status {@code 404 (Not Found)}.
+     * @param id the id of the marketplaceDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the marketplaceDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Marketplace> getMarketplace(@PathVariable("id") String id) {
+    public ResponseEntity<MarketplaceDTO> getMarketplace(@PathVariable("id") String id) {
         log.debug("REST request to get Marketplace : {}", id);
-        Optional<Marketplace> marketplace = marketplaceService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(marketplace);
+        Optional<MarketplaceDTO> marketplaceDTO = marketplaceService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(marketplaceDTO);
     }
 
     /**
      * {@code DELETE  /marketplaces/:id} : delete the "id" marketplace.
      *
-     * @param id the id of the marketplace to delete.
+     * @param id the id of the marketplaceDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")

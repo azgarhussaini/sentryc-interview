@@ -1,6 +1,6 @@
 package com.mycompany.myapp.service;
 
-import com.mycompany.myapp.domain.Producer;
+import com.mycompany.myapp.service.dto.ProducerDTO;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,33 +12,33 @@ public interface ProducerService {
     /**
      * Save a producer.
      *
-     * @param producer the entity to save.
+     * @param producerDTO the entity to save.
      * @return the persisted entity.
      */
-    Producer save(Producer producer);
+    ProducerDTO save(ProducerDTO producerDTO);
 
     /**
      * Updates a producer.
      *
-     * @param producer the entity to update.
+     * @param producerDTO the entity to update.
      * @return the persisted entity.
      */
-    Producer update(Producer producer);
+    ProducerDTO update(ProducerDTO producerDTO);
 
     /**
      * Partially updates a producer.
      *
-     * @param producer the entity to update partially.
+     * @param producerDTO the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<Producer> partialUpdate(Producer producer);
+    Optional<ProducerDTO> partialUpdate(ProducerDTO producerDTO);
 
     /**
-     * Get all the Producer where Seller is {@code null}.
+     * Get all the ProducerDTO where Seller is {@code null}.
      *
      * @return the {@link List} of entities.
      */
-    List<Producer> findAllWhereSellerIsNull();
+    List<ProducerDTO> findAllWhereSellerIsNull();
 
     /**
      * Get the "id" producer.
@@ -46,7 +46,7 @@ public interface ProducerService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<Producer> findOne(UUID id);
+    Optional<ProducerDTO> findOne(UUID id);
 
     /**
      * Delete the "id" producer.

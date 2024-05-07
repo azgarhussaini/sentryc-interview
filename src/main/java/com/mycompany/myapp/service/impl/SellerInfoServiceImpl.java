@@ -3,6 +3,8 @@ package com.mycompany.myapp.service.impl;
 import com.mycompany.myapp.domain.SellerInfo;
 import com.mycompany.myapp.repository.SellerInfoRepository;
 import com.mycompany.myapp.service.SellerInfoService;
+import com.mycompany.myapp.service.dto.SellerInfoDTO;
+import com.mycompany.myapp.service.mapper.SellerInfoMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -21,52 +23,49 @@ public class SellerInfoServiceImpl implements SellerInfoService {
 
     private final SellerInfoRepository sellerInfoRepository;
 
-    public SellerInfoServiceImpl(SellerInfoRepository sellerInfoRepository) {
+    private final SellerInfoMapper sellerInfoMapper;
+
+    public SellerInfoServiceImpl(SellerInfoRepository sellerInfoRepository, SellerInfoMapper sellerInfoMapper) {
         this.sellerInfoRepository = sellerInfoRepository;
+        this.sellerInfoMapper = sellerInfoMapper;
     }
 
     @Override
-    public SellerInfo save(SellerInfo sellerInfo) {
-        log.debug("Request to save SellerInfo : {}", sellerInfo);
-        return sellerInfoRepository.save(sellerInfo);
+    public SellerInfoDTO save(SellerInfoDTO sellerInfoDTO) {
+        log.debug("Request to save SellerInfo : {}", sellerInfoDTO);
+        SellerInfo sellerInfo = sellerInfoMapper.toEntity(sellerInfoDTO);
+        sellerInfo = sellerInfoRepository.save(sellerInfo);
+        return sellerInfoMapper.toDto(sellerInfo);
     }
 
     @Override
-    public SellerInfo update(SellerInfo sellerInfo) {
-        log.debug("Request to update SellerInfo : {}", sellerInfo);
-        return sellerInfoRepository.save(sellerInfo);
+    public SellerInfoDTO update(SellerInfoDTO sellerInfoDTO) {
+        log.debug("Request to update SellerInfo : {}", sellerInfoDTO);
+        SellerInfo sellerInfo = sellerInfoMapper.toEntity(sellerInfoDTO);
+        sellerInfo = sellerInfoRepository.save(sellerInfo);
+        return sellerInfoMapper.toDto(sellerInfo);
     }
 
     @Override
-    public Optional<SellerInfo> partialUpdate(SellerInfo sellerInfo) {
-        log.debug("Request to partially update SellerInfo : {}", sellerInfo);
+    public Optional<SellerInfoDTO> partialUpdate(SellerInfoDTO sellerInfoDTO) {
+        log.debug("Request to partially update SellerInfo : {}", sellerInfoDTO);
 
         return sellerInfoRepository
-            .findById(sellerInfo.getId())
+            .findById(sellerInfoDTO.getId())
             .map(existingSellerInfo -> {
-                if (sellerInfo.getMarketplaceName() != null) {
-                    existingSellerInfo.setMarketplaceName(sellerInfo.getMarketplaceName());
-                }
-                if (sellerInfo.getUrl() != null) {
-                    existingSellerInfo.setUrl(sellerInfo.getUrl());
-                }
-                if (sellerInfo.getCountry() != null) {
-                    existingSellerInfo.setCountry(sellerInfo.getCountry());
-                }
-                if (sellerInfo.getExternalId() != null) {
-                    existingSellerInfo.setExternalId(sellerInfo.getExternalId());
-                }
+                sellerInfoMapper.partialUpdate(existingSellerInfo, sellerInfoDTO);
 
                 return existingSellerInfo;
             })
-            .map(sellerInfoRepository::save);
+            .map(sellerInfoRepository::save)
+            .map(sellerInfoMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<SellerInfo> findOne(UUID id) {
+    public Optional<SellerInfoDTO> findOne(UUID id) {
         log.debug("Request to get SellerInfo : {}", id);
-        return sellerInfoRepository.findById(id);
+        return sellerInfoRepository.findById(id).map(sellerInfoMapper::toDto);
     }
 
     @Override

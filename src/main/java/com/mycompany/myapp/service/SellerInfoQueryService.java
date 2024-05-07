@@ -4,6 +4,8 @@ import com.mycompany.myapp.domain.*; // for static metamodels
 import com.mycompany.myapp.domain.SellerInfo;
 import com.mycompany.myapp.repository.SellerInfoRepository;
 import com.mycompany.myapp.service.criteria.SellerInfoCriteria;
+import com.mycompany.myapp.service.dto.SellerInfoDTO;
+import com.mycompany.myapp.service.mapper.SellerInfoMapper;
 import jakarta.persistence.criteria.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,7 @@ import tech.jhipster.service.QueryService;
  * Service for executing complex queries for {@link SellerInfo} entities in the database.
  * The main input is a {@link SellerInfoCriteria} which gets converted to {@link Specification},
  * in a way that all the filters must apply.
- * It returns a {@link Page} of {@link SellerInfo} which fulfills the criteria.
+ * It returns a {@link Page} of {@link SellerInfoDTO} which fulfills the criteria.
  */
 @Service
 @Transactional(readOnly = true)
@@ -28,21 +30,24 @@ public class SellerInfoQueryService extends QueryService<SellerInfo> {
 
     private final SellerInfoRepository sellerInfoRepository;
 
-    public SellerInfoQueryService(SellerInfoRepository sellerInfoRepository) {
+    private final SellerInfoMapper sellerInfoMapper;
+
+    public SellerInfoQueryService(SellerInfoRepository sellerInfoRepository, SellerInfoMapper sellerInfoMapper) {
         this.sellerInfoRepository = sellerInfoRepository;
+        this.sellerInfoMapper = sellerInfoMapper;
     }
 
     /**
-     * Return a {@link Page} of {@link SellerInfo} which matches the criteria from the database.
+     * Return a {@link Page} of {@link SellerInfoDTO} which matches the criteria from the database.
      * @param criteria The object which holds all the filters, which the entities should match.
      * @param page The page, which should be returned.
      * @return the matching entities.
      */
     @Transactional(readOnly = true)
-    public Page<SellerInfo> findByCriteria(SellerInfoCriteria criteria, Pageable page) {
+    public Page<SellerInfoDTO> findByCriteria(SellerInfoCriteria criteria, Pageable page) {
         log.debug("find by criteria : {}, page: {}", criteria, page);
         final Specification<SellerInfo> specification = createSpecification(criteria);
-        return sellerInfoRepository.findAll(specification, page);
+        return sellerInfoRepository.findAll(specification, page).map(sellerInfoMapper::toDto);
     }
 
     /**

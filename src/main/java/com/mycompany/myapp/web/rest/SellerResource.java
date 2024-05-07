@@ -1,10 +1,10 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.Seller;
 import com.mycompany.myapp.repository.SellerRepository;
 import com.mycompany.myapp.service.SellerQueryService;
 import com.mycompany.myapp.service.SellerService;
 import com.mycompany.myapp.service.criteria.SellerCriteria;
+import com.mycompany.myapp.service.dto.SellerDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -56,42 +56,42 @@ public class SellerResource {
     /**
      * {@code POST  /sellers} : Create a new seller.
      *
-     * @param seller the seller to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new seller, or with status {@code 400 (Bad Request)} if the seller has already an ID.
+     * @param sellerDTO the sellerDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new sellerDTO, or with status {@code 400 (Bad Request)} if the seller has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<Seller> createSeller(@Valid @RequestBody Seller seller) throws URISyntaxException {
-        log.debug("REST request to save Seller : {}", seller);
-        if (seller.getId() != null) {
+    public ResponseEntity<SellerDTO> createSeller(@Valid @RequestBody SellerDTO sellerDTO) throws URISyntaxException {
+        log.debug("REST request to save Seller : {}", sellerDTO);
+        if (sellerDTO.getId() != null) {
             throw new BadRequestAlertException("A new seller cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        seller = sellerService.save(seller);
-        return ResponseEntity.created(new URI("/api/sellers/" + seller.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, seller.getId().toString()))
-            .body(seller);
+        sellerDTO = sellerService.save(sellerDTO);
+        return ResponseEntity.created(new URI("/api/sellers/" + sellerDTO.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, sellerDTO.getId().toString()))
+            .body(sellerDTO);
     }
 
     /**
      * {@code PUT  /sellers/:id} : Updates an existing seller.
      *
-     * @param id the id of the seller to save.
-     * @param seller the seller to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated seller,
-     * or with status {@code 400 (Bad Request)} if the seller is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the seller couldn't be updated.
+     * @param id the id of the sellerDTO to save.
+     * @param sellerDTO the sellerDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated sellerDTO,
+     * or with status {@code 400 (Bad Request)} if the sellerDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the sellerDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Seller> updateSeller(
+    public ResponseEntity<SellerDTO> updateSeller(
         @PathVariable(value = "id", required = false) final UUID id,
-        @Valid @RequestBody Seller seller
+        @Valid @RequestBody SellerDTO sellerDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update Seller : {}, {}", id, seller);
-        if (seller.getId() == null) {
+        log.debug("REST request to update Seller : {}, {}", id, sellerDTO);
+        if (sellerDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, seller.getId())) {
+        if (!Objects.equals(id, sellerDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -99,33 +99,33 @@ public class SellerResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        seller = sellerService.update(seller);
+        sellerDTO = sellerService.update(sellerDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, seller.getId().toString()))
-            .body(seller);
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, sellerDTO.getId().toString()))
+            .body(sellerDTO);
     }
 
     /**
      * {@code PATCH  /sellers/:id} : Partial updates given fields of an existing seller, field will ignore if it is null
      *
-     * @param id the id of the seller to save.
-     * @param seller the seller to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated seller,
-     * or with status {@code 400 (Bad Request)} if the seller is not valid,
-     * or with status {@code 404 (Not Found)} if the seller is not found,
-     * or with status {@code 500 (Internal Server Error)} if the seller couldn't be updated.
+     * @param id the id of the sellerDTO to save.
+     * @param sellerDTO the sellerDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated sellerDTO,
+     * or with status {@code 400 (Bad Request)} if the sellerDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the sellerDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the sellerDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<Seller> partialUpdateSeller(
+    public ResponseEntity<SellerDTO> partialUpdateSeller(
         @PathVariable(value = "id", required = false) final UUID id,
-        @NotNull @RequestBody Seller seller
+        @NotNull @RequestBody SellerDTO sellerDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Seller partially : {}, {}", id, seller);
-        if (seller.getId() == null) {
+        log.debug("REST request to partial update Seller partially : {}, {}", id, sellerDTO);
+        if (sellerDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, seller.getId())) {
+        if (!Objects.equals(id, sellerDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -133,11 +133,11 @@ public class SellerResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<Seller> result = sellerService.partialUpdate(seller);
+        Optional<SellerDTO> result = sellerService.partialUpdate(sellerDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, seller.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, sellerDTO.getId().toString())
         );
     }
 
@@ -149,13 +149,13 @@ public class SellerResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of sellers in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<Seller>> getAllSellers(
+    public ResponseEntity<List<SellerDTO>> getAllSellers(
         SellerCriteria criteria,
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         log.debug("REST request to get Sellers by criteria: {}", criteria);
 
-        Page<Seller> page = sellerQueryService.findByCriteria(criteria, pageable);
+        Page<SellerDTO> page = sellerQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -175,20 +175,20 @@ public class SellerResource {
     /**
      * {@code GET  /sellers/:id} : get the "id" seller.
      *
-     * @param id the id of the seller to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the seller, or with status {@code 404 (Not Found)}.
+     * @param id the id of the sellerDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the sellerDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Seller> getSeller(@PathVariable("id") UUID id) {
+    public ResponseEntity<SellerDTO> getSeller(@PathVariable("id") UUID id) {
         log.debug("REST request to get Seller : {}", id);
-        Optional<Seller> seller = sellerService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(seller);
+        Optional<SellerDTO> sellerDTO = sellerService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(sellerDTO);
     }
 
     /**
      * {@code DELETE  /sellers/:id} : delete the "id" seller.
      *
-     * @param id the id of the seller to delete.
+     * @param id the id of the sellerDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")

@@ -4,6 +4,8 @@ import com.mycompany.myapp.domain.*; // for static metamodels
 import com.mycompany.myapp.domain.Marketplace;
 import com.mycompany.myapp.repository.MarketplaceRepository;
 import com.mycompany.myapp.service.criteria.MarketplaceCriteria;
+import com.mycompany.myapp.service.dto.MarketplaceDTO;
+import com.mycompany.myapp.service.mapper.MarketplaceMapper;
 import jakarta.persistence.criteria.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,7 @@ import tech.jhipster.service.QueryService;
  * Service for executing complex queries for {@link Marketplace} entities in the database.
  * The main input is a {@link MarketplaceCriteria} which gets converted to {@link Specification},
  * in a way that all the filters must apply.
- * It returns a {@link Page} of {@link Marketplace} which fulfills the criteria.
+ * It returns a {@link Page} of {@link MarketplaceDTO} which fulfills the criteria.
  */
 @Service
 @Transactional(readOnly = true)
@@ -28,21 +30,24 @@ public class MarketplaceQueryService extends QueryService<Marketplace> {
 
     private final MarketplaceRepository marketplaceRepository;
 
-    public MarketplaceQueryService(MarketplaceRepository marketplaceRepository) {
+    private final MarketplaceMapper marketplaceMapper;
+
+    public MarketplaceQueryService(MarketplaceRepository marketplaceRepository, MarketplaceMapper marketplaceMapper) {
         this.marketplaceRepository = marketplaceRepository;
+        this.marketplaceMapper = marketplaceMapper;
     }
 
     /**
-     * Return a {@link Page} of {@link Marketplace} which matches the criteria from the database.
+     * Return a {@link Page} of {@link MarketplaceDTO} which matches the criteria from the database.
      * @param criteria The object which holds all the filters, which the entities should match.
      * @param page The page, which should be returned.
      * @return the matching entities.
      */
     @Transactional(readOnly = true)
-    public Page<Marketplace> findByCriteria(MarketplaceCriteria criteria, Pageable page) {
+    public Page<MarketplaceDTO> findByCriteria(MarketplaceCriteria criteria, Pageable page) {
         log.debug("find by criteria : {}, page: {}", criteria, page);
         final Specification<Marketplace> specification = createSpecification(criteria);
-        return marketplaceRepository.findAll(specification, page);
+        return marketplaceRepository.findAll(specification, page).map(marketplaceMapper::toDto);
     }
 
     /**
