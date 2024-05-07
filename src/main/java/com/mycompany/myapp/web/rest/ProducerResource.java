@@ -1,10 +1,10 @@
 package com.mycompany.myapp.web.rest;
 
-import com.mycompany.myapp.domain.Producer;
 import com.mycompany.myapp.repository.ProducerRepository;
 import com.mycompany.myapp.service.ProducerQueryService;
 import com.mycompany.myapp.service.ProducerService;
 import com.mycompany.myapp.service.criteria.ProducerCriteria;
+import com.mycompany.myapp.service.dto.ProducerDTO;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -60,42 +60,42 @@ public class ProducerResource {
     /**
      * {@code POST  /producers} : Create a new producer.
      *
-     * @param producer the producer to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new producer, or with status {@code 400 (Bad Request)} if the producer has already an ID.
+     * @param producerDTO the producerDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new producerDTO, or with status {@code 400 (Bad Request)} if the producer has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<Producer> createProducer(@Valid @RequestBody Producer producer) throws URISyntaxException {
-        log.debug("REST request to save Producer : {}", producer);
-        if (producer.getId() != null) {
+    public ResponseEntity<ProducerDTO> createProducer(@Valid @RequestBody ProducerDTO producerDTO) throws URISyntaxException {
+        log.debug("REST request to save Producer : {}", producerDTO);
+        if (producerDTO.getId() != null) {
             throw new BadRequestAlertException("A new producer cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        producer = producerService.save(producer);
-        return ResponseEntity.created(new URI("/api/producers/" + producer.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, producer.getId().toString()))
-            .body(producer);
+        producerDTO = producerService.save(producerDTO);
+        return ResponseEntity.created(new URI("/api/producers/" + producerDTO.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, producerDTO.getId().toString()))
+            .body(producerDTO);
     }
 
     /**
      * {@code PUT  /producers/:id} : Updates an existing producer.
      *
-     * @param id the id of the producer to save.
-     * @param producer the producer to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated producer,
-     * or with status {@code 400 (Bad Request)} if the producer is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the producer couldn't be updated.
+     * @param id the id of the producerDTO to save.
+     * @param producerDTO the producerDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated producerDTO,
+     * or with status {@code 400 (Bad Request)} if the producerDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the producerDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Producer> updateProducer(
+    public ResponseEntity<ProducerDTO> updateProducer(
         @PathVariable(value = "id", required = false) final UUID id,
-        @Valid @RequestBody Producer producer
+        @Valid @RequestBody ProducerDTO producerDTO
     ) throws URISyntaxException {
-        log.debug("REST request to update Producer : {}, {}", id, producer);
-        if (producer.getId() == null) {
+        log.debug("REST request to update Producer : {}, {}", id, producerDTO);
+        if (producerDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, producer.getId())) {
+        if (!Objects.equals(id, producerDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -103,33 +103,33 @@ public class ProducerResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        producer = producerService.update(producer);
+        producerDTO = producerService.update(producerDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, producer.getId().toString()))
-            .body(producer);
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, producerDTO.getId().toString()))
+            .body(producerDTO);
     }
 
     /**
      * {@code PATCH  /producers/:id} : Partial updates given fields of an existing producer, field will ignore if it is null
      *
-     * @param id the id of the producer to save.
-     * @param producer the producer to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated producer,
-     * or with status {@code 400 (Bad Request)} if the producer is not valid,
-     * or with status {@code 404 (Not Found)} if the producer is not found,
-     * or with status {@code 500 (Internal Server Error)} if the producer couldn't be updated.
+     * @param id the id of the producerDTO to save.
+     * @param producerDTO the producerDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated producerDTO,
+     * or with status {@code 400 (Bad Request)} if the producerDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the producerDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the producerDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    public ResponseEntity<Producer> partialUpdateProducer(
+    public ResponseEntity<ProducerDTO> partialUpdateProducer(
         @PathVariable(value = "id", required = false) final UUID id,
-        @NotNull @RequestBody Producer producer
+        @NotNull @RequestBody ProducerDTO producerDTO
     ) throws URISyntaxException {
-        log.debug("REST request to partial update Producer partially : {}, {}", id, producer);
-        if (producer.getId() == null) {
+        log.debug("REST request to partial update Producer partially : {}, {}", id, producerDTO);
+        if (producerDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, producer.getId())) {
+        if (!Objects.equals(id, producerDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
@@ -137,11 +137,11 @@ public class ProducerResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<Producer> result = producerService.partialUpdate(producer);
+        Optional<ProducerDTO> result = producerService.partialUpdate(producerDTO);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, producer.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, producerDTO.getId().toString())
         );
     }
 
@@ -153,13 +153,13 @@ public class ProducerResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of producers in body.
      */
     @GetMapping("")
-    public ResponseEntity<List<Producer>> getAllProducers(
+    public ResponseEntity<List<ProducerDTO>> getAllProducers(
         ProducerCriteria criteria,
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         log.debug("REST request to get Producers by criteria: {}", criteria);
 
-        Page<Producer> page = producerQueryService.findByCriteria(criteria, pageable);
+        Page<ProducerDTO> page = producerQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -179,20 +179,20 @@ public class ProducerResource {
     /**
      * {@code GET  /producers/:id} : get the "id" producer.
      *
-     * @param id the id of the producer to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the producer, or with status {@code 404 (Not Found)}.
+     * @param id the id of the producerDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the producerDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Producer> getProducer(@PathVariable("id") UUID id) {
+    public ResponseEntity<ProducerDTO> getProducer(@PathVariable("id") UUID id) {
         log.debug("REST request to get Producer : {}", id);
-        Optional<Producer> producer = producerService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(producer);
+        Optional<ProducerDTO> producerDTO = producerService.findOne(id);
+        return ResponseUtil.wrapOrNotFound(producerDTO);
     }
 
     /**
      * {@code DELETE  /producers/:id} : delete the "id" producer.
      *
-     * @param id the id of the producer to delete.
+     * @param id the id of the producerDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")

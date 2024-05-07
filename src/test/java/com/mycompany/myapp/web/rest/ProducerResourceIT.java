@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.myapp.IntegrationTest;
 import com.mycompany.myapp.domain.Producer;
 import com.mycompany.myapp.repository.ProducerRepository;
+import com.mycompany.myapp.service.dto.ProducerDTO;
+import com.mycompany.myapp.service.mapper.ProducerMapper;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -52,6 +54,9 @@ class ProducerResourceIT {
 
     @Autowired
     private ProducerRepository producerRepository;
+
+    @Autowired
+    private ProducerMapper producerMapper;
 
     @Autowired
     private EntityManager em;
@@ -101,18 +106,20 @@ class ProducerResourceIT {
     void createProducer() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
         // Create the Producer
-        var returnedProducer = om.readValue(
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+        var returnedProducerDTO = om.readValue(
             restProducerMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer)))
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producerDTO)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString(),
-            Producer.class
+            ProducerDTO.class
         );
 
         // Validate the Producer in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
+        var returnedProducer = producerMapper.toEntity(returnedProducerDTO);
         assertProducerUpdatableFieldsEquals(returnedProducer, getPersistedProducer(returnedProducer));
     }
 
@@ -121,12 +128,13 @@ class ProducerResourceIT {
     void createProducerWithExistingId() throws Exception {
         // Create the Producer with an existing ID
         producerRepository.saveAndFlush(producer);
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
         // An entity with an existing ID cannot be created, so this API call must fail
         restProducerMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producerDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the Producer in the database
@@ -141,9 +149,10 @@ class ProducerResourceIT {
         producer.setProducerName(null);
 
         // Create the Producer, which fails.
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
 
         restProducerMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producerDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -157,9 +166,10 @@ class ProducerResourceIT {
         producer.setCreatedAt(null);
 
         // Create the Producer, which fails.
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
 
         restProducerMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer)))
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producerDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -368,12 +378,13 @@ class ProducerResourceIT {
             .createdAt(UPDATED_CREATED_AT)
             .producerLogo(UPDATED_PRODUCER_LOGO)
             .producerLogoContentType(UPDATED_PRODUCER_LOGO_CONTENT_TYPE);
+        ProducerDTO producerDTO = producerMapper.toDto(updatedProducer);
 
         restProducerMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, updatedProducer.getId())
+                put(ENTITY_API_URL_ID, producerDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(updatedProducer))
+                    .content(om.writeValueAsBytes(producerDTO))
             )
             .andExpect(status().isOk());
 
@@ -388,10 +399,15 @@ class ProducerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         producer.setId(UUID.randomUUID());
 
+        // Create the Producer
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restProducerMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, producer.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer))
+                put(ENTITY_API_URL_ID, producerDTO.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(producerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -405,10 +421,13 @@ class ProducerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         producer.setId(UUID.randomUUID());
 
+        // Create the Producer
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restProducerMockMvc
             .perform(
-                put(ENTITY_API_URL_ID, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer))
+                put(ENTITY_API_URL_ID, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -422,9 +441,12 @@ class ProducerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         producer.setId(UUID.randomUUID());
 
+        // Create the Producer
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restProducerMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producer)))
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(producerDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Producer in the database
@@ -497,12 +519,15 @@ class ProducerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         producer.setId(UUID.randomUUID());
 
+        // Create the Producer
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
         restProducerMockMvc
             .perform(
-                patch(ENTITY_API_URL_ID, producer.getId())
+                patch(ENTITY_API_URL_ID, producerDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(producer))
+                    .content(om.writeValueAsBytes(producerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -516,12 +541,15 @@ class ProducerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         producer.setId(UUID.randomUUID());
 
+        // Create the Producer
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restProducerMockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, UUID.randomUUID())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(producer))
+                    .content(om.writeValueAsBytes(producerDTO))
             )
             .andExpect(status().isBadRequest());
 
@@ -535,9 +563,12 @@ class ProducerResourceIT {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         producer.setId(UUID.randomUUID());
 
+        // Create the Producer
+        ProducerDTO producerDTO = producerMapper.toDto(producer);
+
         // If url ID doesn't match entity ID, it will throw BadRequestAlertException
         restProducerMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(producer)))
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(producerDTO)))
             .andExpect(status().isMethodNotAllowed());
 
         // Validate the Producer in the database

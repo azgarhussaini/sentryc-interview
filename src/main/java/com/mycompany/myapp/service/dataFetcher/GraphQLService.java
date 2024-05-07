@@ -53,6 +53,7 @@ public class GraphQLService {
                         .dataFetcher("producers", producerDataFetcher)
                         .dataFetcher("sellerInfos", sellerInfoDataFetcher)
                         .dataFetcher("sellers", sellersDataFetcher)
+                        .dataFetcher("sellersGraphQl", sellersDataFetcher)
             )
             .build();
     }

@@ -1,0 +1,25 @@
+package com.mycompany.myapp.service.dto;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.mycompany.myapp.web.rest.TestUtil;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
+class SellerDTOTest {
+
+    @Test
+    void dtoEqualsVerifier() throws Exception {
+        TestUtil.equalsVerifier(SellerDTO.class);
+        SellerDTO sellerDTO1 = new SellerDTO();
+        sellerDTO1.setId(UUID.randomUUID());
+        SellerDTO sellerDTO2 = new SellerDTO();
+        assertThat(sellerDTO1).isNotEqualTo(sellerDTO2);
+        sellerDTO2.setId(sellerDTO1.getId());
+        assertThat(sellerDTO1).isEqualTo(sellerDTO2);
+        sellerDTO2.setId(UUID.randomUUID());
+        assertThat(sellerDTO1).isNotEqualTo(sellerDTO2);
+        sellerDTO1.setId(null);
+        assertThat(sellerDTO1).isNotEqualTo(sellerDTO2);
+    }
+}

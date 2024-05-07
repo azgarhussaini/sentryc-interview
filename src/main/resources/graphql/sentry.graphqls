@@ -7,30 +7,17 @@ type Query {
     producers: [Producer!]!
     sellerInfos: [SellerInfo!]!
     sellers: [Seller!]!
-
-    sellersGraphQl(filter: SellerFilter, page: PageInput!, sortBy: SellerSortBy): SellerPageableResponse!
-
+     sellersGraphQl(filter: SellerFilter, sortBy: SellerSortBy):  [Seller!]!
+#    sellersGraphQl(filter: SellerFilter, page: PageInput!): SellerPageableResponse!
 }
 
-type SellerPageableResponse {
-    meta: PageMeta!
-    data: [Seller!]!
-}
-
-type PageMeta {
-    totalPages: Int!
-    totalItems: Int!
-    currentPage: Int!
-    hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-}
 
 type Seller {
     id: ID!
     sellerName: String!
     state: SellerState!
-    sellerInfo: SellerInfo!
-    producer: [Producer!]!
+    producerId: Producer!
+    sellerInfoId: SellerInfo!
 }
 
 type SellerInfo {
@@ -39,7 +26,7 @@ type SellerInfo {
     url: String!
     country: String
     externalId: String
-    marketplace: Marketplace!
+    marketplaceId: Marketplace!
 }
 
 type Marketplace {
@@ -50,18 +37,9 @@ type Marketplace {
 
 type Producer {
     id: ID!
-    producerName: String
+    producerName: String!
     createdAt: String!
     producerLogo: String
-}
-
-input SellerFilter {
-    state: SellerState
-}
-
-input PageInput {
-    page: Int!
-    size: Int!
 }
 
 enum SellerSortBy {
@@ -78,4 +56,58 @@ enum SellerState {
     WHITELISTED
     GREYLISTED
     BLACKLISTED
+}
+
+
+input SellerFilter {
+    id: ID
+    sellerName: StringQueryOperatorInput
+    state: StringQueryOperatorInput
+}
+
+input SellerInfoFilter {
+    id: ID
+    marketplaceName: StringQueryOperatorInput
+    url: StringQueryOperatorInput
+    country: StringQueryOperatorInput
+    externalId: StringQueryOperatorInput
+}
+input ProducerFilter {
+    id: ID
+    producerName: StringQueryOperatorInput
+    createdAt: StringQueryOperatorInput
+    producerLogo: StringQueryOperatorInput
+}
+
+input MarketplaceFilter {
+    id: ID
+    description: StringQueryOperatorInput
+    marketplaceLogo: StringQueryOperatorInput
+}
+
+input StringQueryOperatorInput {
+    eq: String
+    ne: String
+    in: [String]
+    nin: [String]
+    regex: String
+    glob: String
+}
+
+input PageInput {
+    page: Int!
+    size: Int!
+}
+
+type PageMeta {
+    totalPages: Int!
+    totalItems: Int!
+    currentPage: Int!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+}
+
+type SellerPageableResponse {
+    meta: PageMeta!
+    data: [Seller!]!
 }

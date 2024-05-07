@@ -1,6 +1,6 @@
 package com.mycompany.myapp.service;
 
-import com.mycompany.myapp.domain.Seller;
+import com.mycompany.myapp.service.dto.SellerDTO;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,26 +11,26 @@ public interface SellerService {
     /**
      * Save a seller.
      *
-     * @param seller the entity to save.
+     * @param sellerDTO the entity to save.
      * @return the persisted entity.
      */
-    Seller save(Seller seller);
+    SellerDTO save(SellerDTO sellerDTO);
 
     /**
      * Updates a seller.
      *
-     * @param seller the entity to update.
+     * @param sellerDTO the entity to update.
      * @return the persisted entity.
      */
-    Seller update(Seller seller);
+    SellerDTO update(SellerDTO sellerDTO);
 
     /**
      * Partially updates a seller.
      *
-     * @param seller the entity to update partially.
+     * @param sellerDTO the entity to update partially.
      * @return the persisted entity.
      */
-    Optional<Seller> partialUpdate(Seller seller);
+    Optional<SellerDTO> partialUpdate(SellerDTO sellerDTO);
 
     /**
      * Get the "id" seller.
@@ -38,7 +38,7 @@ public interface SellerService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<Seller> findOne(UUID id);
+    Optional<SellerDTO> findOne(UUID id);
 
     /**
      * Delete the "id" seller.

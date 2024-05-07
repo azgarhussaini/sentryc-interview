@@ -55,3 +55,4 @@ entity Producer {
 filter all
 service all with  serviceImpl
 paginate all with pagination
+dto all with mapstruct

@@ -4,6 +4,8 @@ import com.mycompany.myapp.domain.*; // for static metamodels
 import com.mycompany.myapp.domain.Producer;
 import com.mycompany.myapp.repository.ProducerRepository;
 import com.mycompany.myapp.service.criteria.ProducerCriteria;
+import com.mycompany.myapp.service.dto.ProducerDTO;
+import com.mycompany.myapp.service.mapper.ProducerMapper;
 import jakarta.persistence.criteria.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,7 @@ import tech.jhipster.service.QueryService;
  * Service for executing complex queries for {@link Producer} entities in the database.
  * The main input is a {@link ProducerCriteria} which gets converted to {@link Specification},
  * in a way that all the filters must apply.
- * It returns a {@link Page} of {@link Producer} which fulfills the criteria.
+ * It returns a {@link Page} of {@link ProducerDTO} which fulfills the criteria.
  */
 @Service
 @Transactional(readOnly = true)
@@ -28,21 +30,24 @@ public class ProducerQueryService extends QueryService<Producer> {
 
     private final ProducerRepository producerRepository;
 
-    public ProducerQueryService(ProducerRepository producerRepository) {
+    private final ProducerMapper producerMapper;
+
+    public ProducerQueryService(ProducerRepository producerRepository, ProducerMapper producerMapper) {
         this.producerRepository = producerRepository;
+        this.producerMapper = producerMapper;
     }
 
     /**
-     * Return a {@link Page} of {@link Producer} which matches the criteria from the database.
+     * Return a {@link Page} of {@link ProducerDTO} which matches the criteria from the database.
      * @param criteria The object which holds all the filters, which the entities should match.
      * @param page The page, which should be returned.
      * @return the matching entities.
      */
     @Transactional(readOnly = true)
-    public Page<Producer> findByCriteria(ProducerCriteria criteria, Pageable page) {
+    public Page<ProducerDTO> findByCriteria(ProducerCriteria criteria, Pageable page) {
         log.debug("find by criteria : {}, page: {}", criteria, page);
         final Specification<Producer> specification = createSpecification(criteria);
-        return producerRepository.findAll(specification, page);
+        return producerRepository.findAll(specification, page).map(producerMapper::toDto);
     }
 
     /**
